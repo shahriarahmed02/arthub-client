@@ -48,7 +48,7 @@ export default function ArtworkDetailPage() {
     try {
       const res = await API.post('/payment/create-checkout-session', { artworkId: id });
       if (res.data?.url) {
-        window.location.href = res.data.url; // Stripe Checkout-এ নিয়ে যাওয়া
+        window.location.href = res.data.url; // Stripe Checkout-এ নিয়ে যাওয়া
       }
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to initiate purchase session.');
