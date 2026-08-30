@@ -10,7 +10,7 @@ export default function Home() {
   const [featuredArtworks, setFeaturedArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Mocked/Static Featured Categories as requested in assignment
+  // Featured Categories as requested in assignment
   const categories = [
     { name: 'Digital Painting', count: '120+ Arts', image: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=600' },
     { name: '3D Art', count: '85+ Arts', image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600' },
@@ -18,7 +18,7 @@ export default function Home() {
     { name: 'Abstract', count: '110+ Arts', image: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=600' }
   ];
 
-  // Mocked Top Artists data for display
+  // Top Artists data for display
   const topArtists = [
     { name: 'Elena Rostova', sales: '48 Sales', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', tag: 'Top Seller' },
     { name: 'Marcus Vance', sales: '36 Sales', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', tag: 'Featured' },
@@ -29,9 +29,21 @@ export default function Home() {
     const fetchFeatured = async () => {
       try {
         const res = await API.get('/artworks');
-        setFeaturedArtworks(res.data.slice(0, 6)); // Display latest 6
+        
+        // Extract array safely regardless of response format
+        let dataArray = [];
+        if (Array.isArray(res?.data)) {
+          dataArray = res.data;
+        } else if (Array.isArray(res?.data?.artworks)) {
+          dataArray = res.data.artworks;
+        } else if (Array.isArray(res?.data?.data)) {
+          dataArray = res.data.data;
+        }
+
+        setFeaturedArtworks(dataArray.slice(0, 6)); // Display latest 6
       } catch (err) {
         console.error('Error fetching featured artworks:', err);
+        setFeaturedArtworks([]);
       } finally {
         setLoading(false);
       }
