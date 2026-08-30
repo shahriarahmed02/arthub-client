@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Eye, Tag, User } from 'lucide-react';
+import { Eye, Tag, User, Trash2, Edit3 } from 'lucide-react';
 
-export default function ArtworkCard({ artwork }) {
+export default function ArtworkCard({ artwork, isOwner, onDelete, onEdit }) {
   return (
     <div className="group relative bg-slate-900/80 backdrop-blur-md border border-slate-800/80 hover:border-indigo-500/50 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between">
       
@@ -15,6 +15,9 @@ export default function ArtworkCard({ artwork }) {
           className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
             artwork?.isSold ? 'grayscale opacity-75' : ''
           }`}
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
+          }}
         />
 
         {/* Category Tag */}
@@ -29,6 +32,30 @@ export default function ArtworkCard({ artwork }) {
             Sold Out
           </div>
         )}
+
+        {/* Owner Quick Action Buttons (Edit & Delete) */}
+        {isOwner && (
+          <div className="absolute bottom-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {onEdit && (
+              <button
+                onClick={() => onEdit(artwork)}
+                className="p-2 bg-slate-900/90 hover:bg-amber-600 text-amber-400 hover:text-white rounded-xl border border-slate-700/80 transition-colors shadow-lg backdrop-blur-sm"
+                title="Edit Artwork"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={() => onDelete(artwork?._id)}
+                className="p-2 bg-slate-900/90 hover:bg-rose-600 text-rose-400 hover:text-white rounded-xl border border-slate-700/80 transition-colors shadow-lg backdrop-blur-sm"
+                title="Delete Artwork"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Card Body */}
@@ -37,7 +64,7 @@ export default function ArtworkCard({ artwork }) {
         {/* Title & Artist */}
         <div className="space-y-2">
           <h2 className="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors line-clamp-1 tracking-tight">
-            {artwork?.title}
+            {artwork?.title || 'Untitled Artwork'}
           </h2>
           <div className="flex items-center gap-2 text-xs text-slate-400">
             <div className="p-1 rounded-md bg-indigo-500/10 text-indigo-400">
@@ -52,7 +79,7 @@ export default function ArtworkCard({ artwork }) {
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 block">Price</span>
             <span className="text-xl font-black text-indigo-400 tracking-tight">
-              ${artwork?.price}
+              ${artwork?.price ?? 0}
             </span>
           </div>
 
