@@ -9,6 +9,7 @@ import {
   DollarSign, 
   PlusCircle, 
   Trash2, 
+  Pencil, 
   Tag, 
   ExternalLink, 
   Loader2, 
@@ -29,25 +30,24 @@ export default function ArtistDashboard() {
 
   useEffect(() => {
     const fetchArtistData = async () => {
-  // Prefer email or sanitized user identifier for safe route parameters
-  const artistIdentifier = user?.email || user?.name;
-  if (!artistIdentifier) return;
+      const artistIdentifier = user?.email || user?.name;
+      if (!artistIdentifier) return;
 
-  try {
-    const [artRes, salesRes] = await Promise.allSettled([
-      API.get(`/artist/my-artworks/${encodeURIComponent(artistIdentifier)}`),
-      API.get(`/artist/sales-history/${encodeURIComponent(artistIdentifier)}`)
-    ]);
+      try {
+        const [artRes, salesRes] = await Promise.allSettled([
+          API.get(`/artist/my-artworks/${encodeURIComponent(artistIdentifier)}`),
+          API.get(`/artist/sales-history/${encodeURIComponent(artistIdentifier)}`)
+        ]);
 
-    if (artRes.status === 'fulfilled') setArtworks(artRes.value.data || []);
-    if (salesRes.status === 'fulfilled') setSales(salesRes.value.data || []);
-  } catch (err) {
-    console.error('Failed to fetch artist studio data:', err);
-    showFeedback('error', 'Failed to load some studio data.');
-  } finally {
-    setLoading(false);
-  }
-};
+        if (artRes.status === 'fulfilled') setArtworks(artRes.value.data || []);
+        if (salesRes.status === 'fulfilled') setSales(salesRes.value.data || []);
+      } catch (err) {
+        console.error('Failed to fetch artist studio data:', err);
+        showFeedback('error', 'Failed to load some studio data.');
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchArtistData();
   }, [user]);
 
@@ -57,6 +57,9 @@ export default function ArtistDashboard() {
   };
 
   const handleDeleteArtwork = async (id) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this artwork?');
+    if (!confirmDelete) return;
+
     const previousArtworks = [...artworks];
 
     // Optimistic deletion from state
@@ -236,6 +239,7 @@ export default function ArtistDashboard() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {/* View Link */}
                           <Link
                             href={`/artworks/${art._id}`}
                             className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
@@ -243,6 +247,17 @@ export default function ArtistDashboard() {
                           >
                             <ExternalLink className="w-4 h-4" />
                           </Link>
+
+                          {/* Edit Link */}
+                          <Link
+                            href={`/edit-artwork/${art._id}`}
+                            className="p-2 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 rounded-lg transition-colors"
+                            title="Edit Artwork"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Link>
+
+                          {/* Delete Button */}
                           <button
                             disabled={deletingId === art._id}
                             onClick={() => handleDeleteArtwork(art._id)}
