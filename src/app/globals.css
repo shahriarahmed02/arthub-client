@@ -1,3 +1,31 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+
+
+@layer base {
+  :root {
+    /* Rich Luxury Dark Palette */
+    --bg-primary: #0b0f19;      /* Deep Midnight Dark */
+    --bg-card: #111827;         /* Card background */
+    --bg-card-hover: #1f2937;   /* Hover background */
+    
+    --border-color: #1f2937;    /* Subtle borders */
+    --border-highlight: #374151;
+
+    /* Primary Accent Colors (Vibrant Neon Indigo/Purple) */
+    --accent-primary: #6366f1;  /* Indigo-500 */
+    --accent-hover: #4f46e5;    /* Indigo-600 */
+    --accent-glow: rgba(99, 102, 241, 0.25);
+
+    /* Text Colors */
+    --text-main: #f9fafb;       /* Bright White */
+    --text-muted: #9ca3af;      /* Muted Gray */
+  }
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-sans, system-ui, sans-serif);
+}

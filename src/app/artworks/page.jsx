@@ -28,31 +28,56 @@ export default function BrowseArtworks() {
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
+        setLoading(true);
         const res = await API.get('/artworks');
-        setArtworks(res.data);
+        const data = res?.data;
+
+        // Safely extract array response
+        if (Array.isArray(data)) {
+          setArtworks(data);
+        } else if (Array.isArray(data?.data)) {
+          setArtworks(data.data);
+        } else if (Array.isArray(data?.artworks)) {
+          setArtworks(data.artworks);
+        } else {
+          setArtworks([]);
+        }
       } catch (err) {
         console.error('Failed to fetch artworks:', err);
+        setArtworks([]);
       } finally {
         setLoading(false);
       }
     };
+
     fetchArtworks();
   }, []);
 
-  // Filter Logic
-  const filteredArtworks = artworks
+  // Safe Guard: Ensure artworks is always an array
+  const safeArtworks = Array.isArray(artworks) ? artworks : [];
+
+  // Filter & Sort Logic
+  const filteredArtworks = safeArtworks
     .filter((art) => {
       const matchesSearch =
-        art.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        art.artistName.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'All' || art.category === selectedCategory;
-      const matchesPrice = art.price <= priceRange;
+        (art?.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (art?.artistName || art?.artist || '').toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesCategory = selectedCategory === 'All' || art?.category === selectedCategory;
+      const matchesPrice = (art?.price ?? 0) <= priceRange;
+
       return matchesSearch && matchesCategory && matchesPrice;
     })
     .sort((a, b) => {
-      if (sortBy === 'price-low') return a.price - b.price;
-      if (sortBy === 'price-high') return b.price - a.price;
-      return new Date(b.createdAt) - new Date(a.createdAt); // newest
+      const priceA = a?.price ?? 0;
+      const priceB = b?.price ?? 0;
+
+      if (sortBy === 'price-low') return priceA - priceB;
+      if (sortBy === 'price-high') return priceB - priceA;
+
+      const dateA = new Date(a?.createdAt || 0);
+      const dateB = new Date(b?.createdAt || 0);
+      return dateB - dateA; // newest
     });
 
   // Pagination Logic
@@ -154,7 +179,7 @@ export default function BrowseArtworks() {
       ) : currentArtworks.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentArtworks.map((art) => (
-            <ArtworkCard key={art._id} artwork={art} />
+            <ArtworkCard key={art._id || art.id} artwork={art} />
           ))}
         </div>
       ) : (

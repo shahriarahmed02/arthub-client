@@ -2,7 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import API from '@/lib/api';
-import { Users, Palette, DollarSign, ShoppingCart, Shield, ArrowUpRight } from 'lucide-react';
+import { 
+  Users, 
+  Palette, 
+  DollarSign, 
+  ShoppingCart, 
+  Shield, 
+  ArrowUpRight, 
+  Search, 
+  Loader2,
+  AlertCircle
+} from 'lucide-react';
 
 export default function AdminDashboard() {
   const [analytics, setAnalytics] = useState(null);
@@ -10,20 +20,26 @@ export default function AdminDashboard() {
   const [transactions, setTransactions] = useState([]);
   const [activeTab, setActiveTab] = useState('users');
   const [loading, setLoading] = useState(true);
+  const [updatingUser, setUpdatingUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        const [analyticsRes, usersRes, transRes] = await Promise.all([
+        const [analyticsRes, usersRes, transRes] = await Promise.allSettled([
           API.get('/admin/analytics'),
           API.get('/admin/users'),
           API.get('/admin/transactions')
         ]);
-        setAnalytics(analyticsRes.data);
-        setUsers(usersRes.data);
-        setTransactions(transRes.data);
+
+        if (analyticsRes.status === 'fulfilled') setAnalytics(analyticsRes.value.data);
+        if (usersRes.status === 'fulfilled') setUsers(usersRes.value.data);
+        if (transRes.status === 'fulfilled') setTransactions(transRes.value.data);
+
       } catch (err) {
         console.error('Failed to fetch admin dashboard data:', err);
+        showFeedback('error', 'Failed to load some dashboard metrics.');
       } finally {
         setLoading(false);
       }
@@ -32,35 +48,88 @@ export default function AdminDashboard() {
     fetchAdminData();
   }, []);
 
+  const showFeedback = (type, text) => {
+    setStatusMessage({ type, text });
+    setTimeout(() => setStatusMessage({ type: '', text: '' }), 4000);
+  };
+
   const handleRoleChange = async (userId, newRole) => {
+    const previousUsers = [...users];
+    
+    // Optimistic UI update
+    setUsers(users.map((u) => (u._id === userId ? { ...u, role: newRole } : u)));
+    setUpdatingUser(userId);
+
     try {
       const res = await API.patch(`/admin/users/${userId}/role`, { role: newRole });
       setUsers(users.map((u) => (u._id === userId ? res.data : u)));
+      showFeedback('success', 'User role updated successfully.');
     } catch (err) {
-      alert('Failed to update user role');
+      // Revert on error
+      setUsers(previousUsers);
+      showFeedback('error', err.response?.data?.message || 'Failed to update user role.');
+    } finally {
+      setUpdatingUser(null);
     }
   };
 
+  // Filtered lists based on search
+  const filteredUsers = users.filter((u) => 
+    u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredTransactions = transactions.filter((t) => 
+    t._id?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    t.userEmail?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto p-10 text-center space-y-4">
-        <div className="animate-spin w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto"></div>
-        <p className="text-slate-400">Loading System Analytics & Management...</p>
+      <div className="max-w-7xl mx-auto p-20 text-center space-y-4">
+        <Loader2 className="animate-spin w-10 h-10 text-indigo-500 mx-auto" />
+        <p className="text-slate-400 font-medium">Loading System Analytics & Management...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-2">
-          <Shield className="w-8 h-8 text-indigo-500" /> Admin Command Center
-        </h1>
-        <p className="text-slate-400 text-sm mt-1">
-          Monitor system analytics, update user roles, and track all live marketplace transactions.
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-2 text-white">
+            <Shield className="w-8 h-8 text-indigo-500" /> Admin Command Center
+          </h1>
+          <p className="text-slate-400 text-sm mt-1">
+            Monitor system analytics, update user roles, and track live transactions.
+          </p>
+        </div>
+
+        {/* Global Search */}
+        <div className="relative w-full md:w-72">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input
+            type="text"
+            placeholder={`Search ${activeTab}...`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+          />
+        </div>
       </div>
+
+      {/* Dynamic Status Feedback */}
+      {statusMessage.text && (
+        <div className={`p-4 rounded-xl flex items-center gap-3 text-sm font-medium ${
+          statusMessage.type === 'error' 
+            ? 'bg-rose-500/10 border border-rose-500/20 text-rose-400' 
+            : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+        }`}>
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          {statusMessage.text}
+        </div>
+      )}
 
       {/* Analytics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -137,36 +206,50 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {users.map((u) => (
-                  <tr key={u._id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-white">{u.name}</td>
-                    <td className="px-6 py-4 text-slate-400">{u.email}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                          u.role === 'admin'
-                            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                            : u.role === 'artist'
-                            ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                            : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                        }`}
-                      >
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={u.role}
-                        onChange={(e) => handleRoleChange(u._id, e.target.value)}
-                        className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-medium focus:outline-none focus:border-indigo-500"
-                      >
-                        <option value="user">Buyer (User)</option>
-                        <option value="artist">Artist</option>
-                        <option value="admin">System Admin</option>
-                      </select>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((u) => (
+                    <tr key={u._id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="px-6 py-4 font-semibold text-white">{u.name}</td>
+                      <td className="px-6 py-4 text-slate-400">{u.email}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                            u.role === 'admin'
+                              ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                              : u.role === 'artist'
+                              ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                              : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
+                          }`}
+                        >
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <select
+                            disabled={updatingUser === u._id}
+                            value={u.role}
+                            onChange={(e) => handleRoleChange(u._id, e.target.value)}
+                            className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 font-medium focus:outline-none focus:border-indigo-500 disabled:opacity-50"
+                          >
+                            <option value="user">Buyer (User)</option>
+                            <option value="artist">Artist</option>
+                            <option value="admin">System Admin</option>
+                          </select>
+                          {updatingUser === u._id && (
+                            <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-10 text-center text-slate-500">
+                      No matching users found.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -188,8 +271,8 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
-                {transactions.length > 0 ? (
-                  transactions.map((t) => (
+                {filteredTransactions.length > 0 ? (
+                  filteredTransactions.map((t) => (
                     <tr key={t._id} className="hover:bg-slate-800/40 transition-colors">
                       <td className="px-6 py-4 font-mono text-xs text-indigo-400">{t._id}</td>
                       <td className="px-6 py-4 font-medium uppercase text-xs">{t.type || 'Artwork Purchase'}</td>
@@ -203,7 +286,7 @@ export default function AdminDashboard() {
                 ) : (
                   <tr>
                     <td colSpan="5" className="px-6 py-10 text-center text-slate-500">
-                      No recorded transactions found in database.
+                      No matching transactions found.
                     </td>
                   </tr>
                 )}
