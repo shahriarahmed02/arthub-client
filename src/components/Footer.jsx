@@ -151,18 +151,8 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/artists" className="hover:text-indigo-400 transition-colors">
-                Featured Artists
-              </Link>
-            </li>
-            <li>
-              <Link href="/dashboard" className="hover:text-indigo-400 transition-colors">
+              <Link href="/dashboard/artist" className="hover:text-indigo-400 transition-colors">
                 Studio Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link href="/pricing" className="hover:text-indigo-400 transition-colors">
-                Subscription Plans
               </Link>
             </li>
           </ul>
