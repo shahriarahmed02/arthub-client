@@ -335,6 +335,7 @@ export default function ArtistDashboard() {
             </table>
           </div>
         </div>
+        // ......
       )}
     </div>
   );
