@@ -30,19 +30,18 @@ export default function ArtistDashboard() {
 
   useEffect(() => {
     const fetchArtistData = async () => {
-      const artistIdentifier = user?.email || user?.name;
-      console.log("Current Logged-in User:", user);
-      console.log("Searching with Identifier:", artistIdentifier);
+      console.log("Current Logged-in User for Studio:", user);
 
-      if (!artistIdentifier) {
+      if (!user) {
         setLoading(false);
         return;
       }
 
       try {
+        // Updated: Calling endpoints with token authentication handled in backend headers
         const [artRes, salesRes] = await Promise.allSettled([
-          API.get(`/artist/my-artworks/${encodeURIComponent(artistIdentifier)}`),
-          API.get(`/artist/sales-history/${encodeURIComponent(artistIdentifier)}`)
+          API.get(`/artist/my-artworks`),
+          API.get(`/artist/sales-history`)
         ]);
 
         console.log("Artworks API Response:", artRes);
@@ -251,7 +250,6 @@ export default function ArtistDashboard() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {/* View Link */}
                           <Link
                             href={`/artworks/${art._id}`}
                             className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
@@ -260,7 +258,6 @@ export default function ArtistDashboard() {
                             <ExternalLink className="w-4 h-4" />
                           </Link>
 
-                          {/* Edit Link */}
                           <Link
                             href={`/edit-artwork/${art._id}`}
                             className="p-2 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 rounded-lg transition-colors"
@@ -269,7 +266,6 @@ export default function ArtistDashboard() {
                             <Pencil className="w-4 h-4" />
                           </Link>
 
-                          {/* Delete Button */}
                           <button
                             disabled={deletingId === art._id}
                             onClick={() => handleDeleteArtwork(art._id)}
@@ -335,7 +331,6 @@ export default function ArtistDashboard() {
             </table>
           </div>
         </div>
-        // ......
       )}
     </div>
   );
