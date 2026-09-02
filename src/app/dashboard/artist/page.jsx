@@ -40,8 +40,8 @@ export default function ArtistDashboard() {
       try {
         // Updated with correct backend base path '/api/artist'
         const [artRes, salesRes] = await Promise.allSettled([
-          API.get(`/api/artist/my-artworks`),
-          API.get(`/api/artist/sales-history`)
+          API.get(`/artist/my-artworks`),
+          API.get(`/artist/sales-history`)
         ]);
 
         console.log("Artworks API Response:", artRes);
