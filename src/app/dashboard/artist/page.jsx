@@ -38,10 +38,10 @@ export default function ArtistDashboard() {
       }
 
       try {
-        // Updated: Calling endpoints with token authentication handled in backend headers
+        // Updated with correct backend base path '/api/artist'
         const [artRes, salesRes] = await Promise.allSettled([
-          API.get(`/artist/my-artworks`),
-          API.get(`/artist/sales-history`)
+          API.get(`/api/artist/my-artworks`),
+          API.get(`/api/artist/sales-history`)
         ]);
 
         console.log("Artworks API Response:", artRes);
