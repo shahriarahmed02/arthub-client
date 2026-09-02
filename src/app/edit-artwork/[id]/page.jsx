@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import API from '@/lib/api';
-import { Loader2, PencilSquare, Tag, DollarSign, Image as ImageIcon, FileText, ArrowLeft } from 'lucide-react';
+import { Loader2, Pencil, Tag, DollarSign, Image as ImageIcon, FileText, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function EditArtworkPage() {
@@ -88,7 +88,7 @@ export default function EditArtworkPage() {
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
         <div>
           <h1 className="text-2xl font-extrabold text-white flex items-center gap-3">
-            <PencilSquare className="w-7 h-7 text-indigo-500" /> Edit Artwork
+            <Pencil className="w-7 h-7 text-indigo-500" /> Edit Artwork
           </h1>
           <p className="text-slate-400 text-sm mt-1">
             Update your artwork details, pricing, or description below.
