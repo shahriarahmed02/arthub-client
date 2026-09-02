@@ -41,9 +41,16 @@ export default function Navbar() {
                   Browse Artworks
                 </Link>
               </li>
+              {user && (
+                <li>
+                  <Link href={getDashboardRoute()} className={pathname.startsWith('/dashboard') ? 'text-indigo-400 font-bold bg-indigo-500/10' : 'text-slate-300'}>
+                    Dashboard
+                  </Link>
+                </li>
+              )}
               {user?.role === 'artist' && (
                 <li>
-                  <Link href="/dashboard/artist" className={isActive('/dashboard/artist') ? 'text-indigo-400 font-bold bg-indigo-500/10' : 'text-slate-300'}>
+                  <Link href="/add-artwork" className={isActive('/add-artwork') ? 'text-indigo-400 font-bold bg-indigo-500/10' : 'text-slate-300'}>
                     <PlusCircle className="w-4 h-4" /> Add Artwork
                   </Link>
                 </li>
