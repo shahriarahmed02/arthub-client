@@ -31,13 +31,22 @@ export default function ArtistDashboard() {
   useEffect(() => {
     const fetchArtistData = async () => {
       const artistIdentifier = user?.email || user?.name;
-      if (!artistIdentifier) return;
+      console.log("Current Logged-in User:", user);
+      console.log("Searching with Identifier:", artistIdentifier);
+
+      if (!artistIdentifier) {
+        setLoading(false);
+        return;
+      }
 
       try {
         const [artRes, salesRes] = await Promise.allSettled([
           API.get(`/artist/my-artworks/${encodeURIComponent(artistIdentifier)}`),
           API.get(`/artist/sales-history/${encodeURIComponent(artistIdentifier)}`)
         ]);
+
+        console.log("Artworks API Response:", artRes);
+        console.log("Sales API Response:", salesRes);
 
         if (artRes.status === 'fulfilled') setArtworks(artRes.value.data || []);
         if (salesRes.status === 'fulfilled') setSales(salesRes.value.data || []);
@@ -48,7 +57,10 @@ export default function ArtistDashboard() {
         setLoading(false);
       }
     };
-    fetchArtistData();
+
+    if (user) {
+      fetchArtistData();
+    }
   }, [user]);
 
   const showFeedback = (type, text) => {
