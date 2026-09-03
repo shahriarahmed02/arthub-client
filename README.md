@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ArtHub – Online Art Marketplace
 
-## Getting Started
+ArtHub is a modern, full-stack digital platform connecting art lovers, collectors, and buyers with talented artists worldwide. The platform enables users to discover and purchase original artworks, empowers artists to manage their portfolios and track sales, and provides administrators with comprehensive system oversight.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Live URL & Credentials
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Live Demo:** [https://arthub-eta.vercel.app](https://arthub-eta.vercel.app)
+- **GitHub Repositories:**
+  - **Client (Frontend):** [https://github.com/shahriarahmed02/arthub-client](https://github.com/shahriarahmed02/arthub-client)
+  - **Server (Backend):** [https://github.com/shahriarahmed02/arthub-server](https://github.com/shahriarahmed02/arthub-server)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Default Admin Credentials
+- **Email:** `admin@arthub.com`
+- **Password:** `Admin@123`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Key Features
 
-To learn more about Next.js, take a look at the following resources:
+- **Role-Based Access Control (RBAC):** Distinct interfaces and permissions for Buyers, Artists, and Admins.
+- **Secure Authentication:** JWT-based authentication supporting email/password login and secure registration.
+- **Stripe Payment Integration:** Secure checkout flows for purchasing artworks and upgrading user subscription tiers (Pro & Premium).
+- **Interactive Artist Studio:** Artists can add, edit, delete, and view sales history for their artworks with image hosting via imgBB.
+- **Collector Reviews & Comments:** Verified buyers can leave reviews and comments on artwork detail pages.
+- **Advanced Search & Filtering:** Filter artworks by category, search by title/artist name, and sort by price or upload date.
+- **Comprehensive Admin Panel:** User management, global artwork controls, transaction tracking, and platform analytics.
+- **Responsive Modern UI:** Built with Tailwind CSS and DaisyUI, supporting seamless mobile and desktop experiences.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech Stack
 
-## Deploy on Vercel
+### Frontend (Client)
+- **Framework:** Next.js (App Router)
+- **Styling:** Tailwind CSS, DaisyUI
+- **Icons:** Lucide React
+- **HTTP Client:** Axios
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Backend (Server)
+- **Runtime:** Node.js, Express.js
+- **Database:** MongoDB with Mongoose
+- **Authentication:** JSON Web Tokens (JWT), bcrypt
+- **Payments:** Stripe API
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Environment Variables
+
+### Client (`.env.local`)
+```env
+NEXT_PUBLIC_API_URL=https://arthub-backend-d1gf.onrender.com/
